@@ -1,0 +1,18 @@
+{
+    "name": "rayful/elasticsearch",
+    "description": "elasticsearch client for php",
+    "type": "composer-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Lee Vinkim",
+            "email": "vinkim@xiyanghui.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.4.0",
+        "elasticsearch/elasticsearch": "~2.0",
+        "monolog/monolog": "@stable"
+    }
+}
