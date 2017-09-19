@@ -15,9 +15,13 @@ use Monolog\Formatter\JsonFormatter;
 
 class Builder
 {
-    private $client;
+    /**
+     * @var array
+     */
+    private $definitions = [];
 
-    private $logger;
+    private $index;
+    private $type;
 
     public function __construct($connectionParams)
     {
@@ -27,57 +31,85 @@ class Builder
 
         $this->setLog();
 
-        $this->client = ClientBuilder::create()
+        $client = ClientBuilder::create()
             ->setHosts($connectionParams)
-            ->setLogger($this->logger)
+            ->setLogger($this->get('logger'))
             ->build();
+
+        $this->set(IndexingDocument::class, new IndexingDocument($client));
+        $this->set(IndexManagement::class, new IndexManagement($client));
     }
 
-    public function addIndex($db, $collection, $docJson)
+    public function setNamespace($index, $type)
     {
-        $doc = json_decode($docJson, true);
+        $this->index = $index;
+        $this->type = $type;
 
-        $params = ['index' => $db, 'type' => $collection];
+        return $this;
+    }
 
-        if (isset($doc['_id']['$id'])) {
-            $params['id'] = $doc['_id']['$id'];
-            unset($doc['_id']);
+    public function putMapping(array $properties)
+    {
+        $this->prepare();
+
+        /** @var IndexManagement $IndexManagement */
+        $IndexManagement = $this->get(IndexManagement::class);
+
+        if (!$IndexManagement->existsIndex($this->index)) {
+            $IndexManagement->createAnIndex($this->index);
         }
 
-        $params['body'] = $doc;
+        $existsMapping = $IndexManagement->getMappings($this->index, $this->type);
 
-        $response = $this->client->index($params);
+        if ($properties && !$existsMapping) {
+            $IndexManagement->putMappings($this->index, $this->type, $properties);
+        }
+
+        return $this;
+    }
+
+    public function indexSingleDocument(array $document)
+    {
+        $this->prepare();
+
+        /** @var IndexingDocument $IndexingDocument */
+        $IndexingDocument = $this->get(IndexingDocument::class);
+
+        $response = $IndexingDocument->singleDocumentIndexing($this->index, $this->type, $document);
 
         return $response;
     }
 
-    public function bulkIndex($db, $collection, $docJsons)
+    public function indexMultiDocuments($documents)
     {
-        $params = ['body' => []];
+        $this->prepare();
 
-        $number = 0;
-        foreach ($docJsons as $docJson) {
-            $number++;
-            if ($number % 1000 == 0) {
-                $this->client->bulk($params);
-                $params = ['body' => []];
-            }
+        /** @var IndexingDocument $IndexingDocument */
+        $IndexingDocument = $this->get(IndexingDocument::class);
 
-            $doc = json_decode($docJson, true);
-            $index = ['_index' => $db, '_type' => $collection];
+        $IndexingDocument->bulkIndexing($this->index, $this->type, $documents);
+    }
 
-            if (isset($doc['_id']['$id'])) {
-                $index['_id'] = $doc['_id']['$id'];
-                unset($doc['_id']);
-            }
+    public function set($id, $service)
+    {
+        $this->definitions[$id] = $service;
+    }
 
-            $params['body'][] = ['index' => $index];
-            $params['body'][] = $doc;
+    public function get($id)
+    {
+        if (isset($this->definitions[$id])) {
+            return $this->definitions[$id];
         }
+        return false;
+    }
 
-        // Send the last batch if it exists
-        if (!empty($params['body'])) {
-            $this->client->bulk($params);
+    private function prepare()
+    {
+        if (!$this->index) {
+            throw new \Exception("'index' is required. See setNamespace(...) method.");
+        }
+        if (!$this->type) {
+            throw new \Exception("'type' is required. See setNamespace(...) method.");
         }
     }
 
@@ -87,8 +119,10 @@ class Builder
         $handler = new StreamHandler($logPath, Logger::INFO, true, 0777);
         $handler->setFormatter(new JsonFormatter);
 
-        $this->logger = new Logger(__CLASS__);
-        $this->logger->pushHandler($handler);
+        $logger = new Logger(__CLASS__);
+        $logger->pushHandler($handler);
+
+        $this->set('logger', $logger);
     }
 
 
