@@ -14,5 +14,10 @@
         "php": ">=5.4.0",
         "elasticsearch/elasticsearch": "~2.0",
         "monolog/monolog": "@stable"
+    },
+    "autoload": {
+        "psr-4": {
+            "Rayful\\Elasticsearch\\": "src/"
+        }
     }
 }
