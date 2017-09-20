@@ -36,11 +36,12 @@ $writer->indexMultiDocuments($documents);
 
 function genDocuments()
 {
-    for ($i=0; $i<10000; $i++){
+    for ($i = 0; $i < 10000; $i++) {
         $document = [
-            'name' => 'lvinkim-'.rand(1,1000),
-            'age' => rand(10,90),
-            'balance' => rand(0,1000),
+            'id' => $i . '-' . uniqid(),
+            'name' => 'lvinkim-' . rand(1, 1000),
+            'age' => rand(10, 90),
+            'balance' => rand(0, 1000),
             'create_at' => time()
         ];
         yield $document;

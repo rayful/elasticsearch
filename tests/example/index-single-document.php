@@ -26,6 +26,7 @@ $properties = [
 ];
 
 $document = [
+    'id'=> '59c1cfb9a008b',
     'name' => 'lvinkim-'.rand(1,1000),
     'age' => rand(10,90),
     'balance' => rand(0,1000),
