@@ -8,6 +8,7 @@
 
 namespace Rayful\Elasticsearch;
 
+use Elasticsearch\Client;
 use Elasticsearch\ClientBuilder;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
@@ -19,9 +20,6 @@ class Builder
      * @var array
      */
     private $definitions = [];
-
-    private $index;
-    private $type;
 
     public function __construct($connectionParams)
     {
@@ -36,58 +34,7 @@ class Builder
             ->setLogger($this->get('logger'))
             ->build();
 
-        $this->set(IndexingDocument::class, new IndexingDocument($client));
-        $this->set(IndexManagement::class, new IndexManagement($client));
-    }
-
-    public function setNamespace($index, $type)
-    {
-        $this->index = $index;
-        $this->type = $type;
-
-        return $this;
-    }
-
-    public function putMapping(array $properties)
-    {
-        $this->prepare();
-
-        /** @var IndexManagement $IndexManagement */
-        $IndexManagement = $this->get(IndexManagement::class);
-
-        if (!$IndexManagement->existsIndex($this->index)) {
-            $IndexManagement->createAnIndex($this->index);
-        }
-
-        $existsMapping = $IndexManagement->getMappings($this->index, $this->type);
-
-        if ($properties && !$existsMapping) {
-            $IndexManagement->putMappings($this->index, $this->type, $properties);
-        }
-
-        return $this;
-    }
-
-    public function indexSingleDocument(array $document)
-    {
-        $this->prepare();
-
-        /** @var IndexingDocument $IndexingDocument */
-        $IndexingDocument = $this->get(IndexingDocument::class);
-
-        $response = $IndexingDocument->singleDocumentIndexing($this->index, $this->type, $document);
-
-        return $response;
-    }
-
-    public function indexMultiDocuments($documents)
-    {
-        $this->prepare();
-
-        /** @var IndexingDocument $IndexingDocument */
-        $IndexingDocument = $this->get(IndexingDocument::class);
-
-        $IndexingDocument->bulkIndexing($this->index, $this->type, $documents);
+        $this->set(Client::class, $client);
     }
 
     public function set($id, $service)
@@ -103,16 +50,6 @@ class Builder
         return false;
     }
 
-    private function prepare()
-    {
-        if (!$this->index) {
-            throw new \Exception("'index' is required. See setNamespace(...) method.");
-        }
-        if (!$this->type) {
-            throw new \Exception("'type' is required. See setNamespace(...) method.");
-        }
-    }
-
     private function setLog()
     {
         $logPath = __DIR__ . '/../var/logs/rayful-elasticsearch.log.' . date("Y-m-d");
@@ -124,6 +61,5 @@ class Builder
 
         $this->set('logger', $logger);
     }
-
 
 }

@@ -45,7 +45,7 @@ class IndexingDocument
         $number = 0;
         $params = ['body' => []];
         foreach ($documents as $document) {
-            $number ++;
+            $number++;
 
             if ($number % 1000 == 0) {
                 $this->client->bulk($params);

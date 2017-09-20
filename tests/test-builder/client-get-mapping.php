@@ -3,10 +3,10 @@
  * Created by PhpStorm.
  * User: lvinkim
  * Date: 9/19/17
- * Time: 10:23 PM
+ * Time: 10:37 PM
  */
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../../vendor/autoload.php';
 
 use Elasticsearch\ClientBuilder;
 
@@ -17,12 +17,13 @@ $client = ClientBuilder::create()
     ->build();
 
 $db = 'lvinkim';
+$collection = 'user';
 
 $params = [
-    'index' => $db
+    'index' => $db,
+    'type' => $collection
 ];
 
-// Create the index
-$response = $client->indices()->create($params);
+$response = $client->indices()->getMapping($params);
 
 var_dump($response);

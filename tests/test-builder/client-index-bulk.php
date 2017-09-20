@@ -6,7 +6,7 @@
  * Time: 10:51 PM
  */
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../../vendor/autoload.php';
 
 use Elasticsearch\ClientBuilder;
 
