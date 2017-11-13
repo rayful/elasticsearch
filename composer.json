@@ -1,7 +1,6 @@
 {
     "name": "rayful/elasticsearch",
     "description": "elasticsearch client for php",
-    "type": "composer-plugin",
     "license": "MIT",
     "authors": [
         {
@@ -12,7 +11,7 @@
     "minimum-stability": "dev",
     "require": {
         "php": ">=5.4.0",
-        "elasticsearch/elasticsearch": "~2.0",
+        "elasticsearch/elasticsearch": "~2.0@beta",
         "monolog/monolog": "@stable"
     },
     "autoload": {
