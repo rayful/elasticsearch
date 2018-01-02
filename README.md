@@ -21,7 +21,7 @@ $db = 'test';
 $collection = 'user';
 
 $properties = [
-    'name' => ['type' => 'string'],
+    'name' => a['type' => 'string'],
     'age' => ['type' => 'integer'],
     'balance' => ['type' => 'double'],
     'create_at' => ['type' => 'date']

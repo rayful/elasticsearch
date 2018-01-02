@@ -8,8 +8,8 @@
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-use Rayful\Elasticsearch\Builder;
-use Rayful\Elasticsearch\Writer;
+use Ryum\ESClient\Builder;
+use Ryum\ESClient\Writer;
 
 $connectionParams = '127.0.0.1:9200';
 $builder = new Builder($connectionParams);

@@ -6,7 +6,7 @@
  * Time: 8:41 AM
  */
 
-namespace Rayful\Elasticsearch;
+namespace Ryum\ESClient;
 
 use Elasticsearch\Client;
 
